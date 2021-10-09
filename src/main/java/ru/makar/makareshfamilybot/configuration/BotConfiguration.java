@@ -2,6 +2,7 @@ package ru.makar.makareshfamilybot.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,5 +20,10 @@ public class BotConfiguration {
     @Bean
     public Set<Map<Long, String>> potentialUsers() {
         return new HashSet<>();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
