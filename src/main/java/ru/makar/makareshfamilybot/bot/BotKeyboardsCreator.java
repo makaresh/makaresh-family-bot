@@ -73,10 +73,34 @@ public class BotKeyboardsCreator {
                     collumn = new ArrayList<>();
                 }
             }
+            if (!collumn.isEmpty()) {
+                buttons.add(collumn);
+            }
             InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
             inlineKeyboardMarkup.setKeyboard(buttons);
             return inlineKeyboardMarkup;
         }
         return null;
+    }
+
+    public InlineKeyboardMarkup initQuantityKeyboard() {
+        List<String> signs = List.of("+", "-");
+        List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        for (String sign : signs) {
+            InlineKeyboardButton inlineKeyboardButtonPlusOne = new InlineKeyboardButton();
+            inlineKeyboardButtonPlusOne.setText(sign + "1");
+            inlineKeyboardButtonPlusOne.setCallbackData(sign + "1");
+            row.add(inlineKeyboardButtonPlusOne);
+            InlineKeyboardButton inlineKeyboardButtonNo = new InlineKeyboardButton();
+            inlineKeyboardButtonNo.setText(sign + "100");
+            inlineKeyboardButtonNo.setCallbackData(sign + "100");
+            row.add(inlineKeyboardButtonNo);
+            buttons.add(row);
+            row = new ArrayList<>();
+        }
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(buttons);
+        return inlineKeyboardMarkup;
     }
 }

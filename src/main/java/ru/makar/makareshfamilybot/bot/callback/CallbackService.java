@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import ru.makar.makareshfamilybot.bot.BotKeyboardsCreator;
 import ru.makar.makareshfamilybot.web.FamilyWebService;
 
 @Service
@@ -12,6 +14,7 @@ import ru.makar.makareshfamilybot.web.FamilyWebService;
 public class CallbackService {
 
     private final FamilyWebService familyWebService;
+    private final BotKeyboardsCreator botKeyboardsCreator;
 
     public SendMessage catchCallback(CallbackQuery callbackQuery) {
         SendMessage sendMessage = new SendMessage();
@@ -25,7 +28,7 @@ public class CallbackService {
                 if ("Другой".equals(selectedData)) {
                     sendMessage.setText("Напишите название продукта");
                 } else {
-                    addProduct(sendMessage, selectedData);
+                    sendMessage.setText("%s уже в корзине, если хотите, то можете изменить его количество");
                 }
                 break;
             case "SELECT":
@@ -34,10 +37,23 @@ public class CallbackService {
                 } else {
                     sendMessage.setText("OK. Не добавлю...");
                 }
+                break;
             case "UPDATE COMMENT":
-                sendMessage.setText("Я хз как эту фичу реализовать так что пусть тут будут текст гыгыгыг))))");
+                updateComment(sendMessage, selectedData, split[2]);
+                break;
             case "UPDATE QUANTITY":
-
+                onUpdateQuantity(sendMessage, selectedData);
+                break;
+            case "UPDATER QUANTITY":
+                updateQuantity(sendMessage, split[1], selectedData);
+                break;
+            case "EMPTY BASKET":
+                if ("Yes".equals(selectedData)) {
+                    emptyBasket(sendMessage);
+                } else {
+                    sendMessage.setText("OK. Не добавлю...");
+                }
+                break;
         }
         return sendMessage;
     }
@@ -51,11 +67,31 @@ public class CallbackService {
         }
     }
 
-    private void updateQuantity() {
-        //TODO На колбек UPDATE QUANTITY появляются кнопки +1 +100, на них добавить тоже колбеки с дополнительной кнопкой возврата к списку продуктов к корзине
+    private void onUpdateQuantity(SendMessage sendMessage, String selectedData) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = botKeyboardsCreator.initQuantityKeyboard();
+        sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessage.setText(String.format("UPDATER QUANTITY\nВыберете количество на которое нужно изменить продукт %s", selectedData));
     }
 
-    private void updateComment() {
-        //TODO Единственное что придумал так это то, что перед комментарием писать "Комментарий:", тогда в методе onSimpleMessage можно будет понять что это комментарий, а не новый продукт
+    private void updateQuantity(SendMessage sendMessage, String product, String summand) {
+        String sign;
+        if (summand.startsWith("-")) {
+            sign = "-";
+        } else {
+            sign = "+";
+        }
+        String number = summand.substring(1);
+        String text = familyWebService.updateProductQuantity(product, Double.valueOf(number), sign);
+        sendMessage.setText(text);
+    }
+
+    private void updateComment(SendMessage sendMessage, String product, String comment) {
+        String text = familyWebService.updateProductComment(product, comment);
+        sendMessage.setText(text);
+    }
+
+    private void emptyBasket(SendMessage sendMessage) {
+        familyWebService.emptyBasket();
+        sendMessage.setText("Все удалил))))");
     }
 }

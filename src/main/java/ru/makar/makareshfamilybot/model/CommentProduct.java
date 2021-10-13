@@ -9,9 +9,8 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class QuantityProduct {
+public class CommentProduct {
     private UUID productId;
     private String productName;
-    private Double quantity;
-    private String sign;
+    private String comment;
 }

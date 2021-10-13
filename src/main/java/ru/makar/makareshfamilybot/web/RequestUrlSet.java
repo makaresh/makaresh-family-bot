@@ -11,4 +11,6 @@ public class RequestUrlSet {
     private String productsShow;
     private String productsInBasket;
     private String updateQuantity;
+    private String updateComment;
+    private String emptyBasket;
 }

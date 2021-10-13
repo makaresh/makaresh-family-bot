@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.makar.makareshfamilybot.model.BasketProduct;
+import ru.makar.makareshfamilybot.model.CommentProduct;
 import ru.makar.makareshfamilybot.model.Product;
 import ru.makar.makareshfamilybot.model.QuantityProduct;
 
@@ -67,14 +68,37 @@ public class FamilyWebService {
                 : List.of();
     }
 
-    public String updateProductQuantity(String name, Double quantity) {
+    public String updateProductQuantity(String name, Double quantity, String sign) {
         Integer integer = restTemplate.postForObject(
                 requestUrlSet.getUpdateQuantity(),
-                new QuantityProduct(UUID.nameUUIDFromBytes(name.getBytes()), name, quantity),
+                new QuantityProduct(UUID.nameUUIDFromBytes(name.getBytes()), name, quantity, sign),
                 Integer.class
         );
-        return (integer > 0)
-                ? String.format("Количество %s на %s", name, quantity)
-                : "Количество не изменилось...";
+        if (integer != null) {
+            return (integer > 0)
+                    ? String.format("Количество %s изменилось на %s", name, quantity)
+                    : "Количество не изменилось...";
+        } else {
+            return "Something went wrong...";
+        }
+    }
+
+    public String updateProductComment(String name, String comment) {
+        Integer integer = restTemplate.postForObject(
+                requestUrlSet.getUpdateComment(),
+                new CommentProduct(UUID.nameUUIDFromBytes(name.getBytes()), name, comment),
+                Integer.class
+        );
+        if (integer != null) {
+            return (integer > 0)
+                    ? String.format("Комментарий к продукту %s был изменен", name)
+                    : "коменнтарий не изменился...";
+        }else {
+            return "Something went wrong...";
+        }
+    }
+
+    public void emptyBasket() {
+        restTemplate.exchange(requestUrlSet.getEmptyBasket(), HttpMethod.GET, null, Void.class);
     }
 }
